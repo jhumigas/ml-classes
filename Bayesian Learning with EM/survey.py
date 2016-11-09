@@ -235,3 +235,71 @@ def em(data, nClusters, nIterations):
 	nPeople, nQuestions = data.shape
 	nAnswers = int(np.max(data))
 
+	# Each latent variable is suppose to be following a probability of distribution qi
+	# q[i,j] = P(personne i belongs to Cluster j)
+	# We store those distribution in an array
+	q = np.zeros((nPeople, nClusters))
+
+	# Probabilities of chosing a given latent variable
+	# Initialized by a uniform distribution
+	# ph(i) = P(Cluster = i)
+	ph = np.ones(nClusters)/nClusters
+
+	# Probabilities the choice of visible variable
+	# knowing that a given latent variable was chosen
+	# phv(i,j,k) = P(Reponse = A(i,j) | Cluster = k)
+	phv = np.array([np.random.random((nQuestions, nAnswers)) for i in range(nClusters)])
+	phv = normalize(phv)
+    
+	# Step E 
+	# We focus only on the distribution q to maximize the MLE
+	for t in range(nIterations):
+		for i in range(nPeople):
+			answers = data[i,:]
+			for c in range(nClusters):
+				# We use log since the probabilities might have small values 
+				# First we add the log of our prior 
+				q[i,c] = np.log(ph[c])
+                
+				# Then we add the log-likelihood 
+				for j in range(nQuestions):
+					q[i,c] += np.log(phv[c,j,int(answers[j]-1)])
+				
+			q[i,:] -= np.max(q[i,:])
+			q[i,:] = np.exp(q[i,:])
+			# normalize
+			q[i,:] /= np.sum(q[i,:])
+        
+		# Step M
+		weights = np.sum(q,0)
+		ph = weights/np.sum(weights)
+
+		for cluster in range(nClusters):
+			for j in range(nQuestions):
+				for k in range(1, nAnswers + 1):
+					s = 0
+					#total = 0.
+					for i in range(nPeople):
+						if (data[i,j] == k):
+							s+= q[i,cluster]
+						#total += q[i,cluster]
+					#phv[cluster, j, k-1] = s/total
+					phv[cluster, j, k-1] = s/weights[cluster]
+                
+				# Normalization 
+				phv[cluster, j, :] /= sum(phv[cluster, j, :])
+
+		model = (ph, phv)
+		return (model, q)
+
+
+def normalize(v):
+	"""
+	Fait pour une matrice 3-D
+	"""
+	dim = v.shape 
+	for i in range(0, dim[0]-1):
+		v[i,:,:] = (v[i,:,:].T/np.sum(v[i,:,:],1)).T
+
+	return v
+
