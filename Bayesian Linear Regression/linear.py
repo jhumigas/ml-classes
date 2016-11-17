@@ -241,8 +241,8 @@ class Filter:
        - self is a reference to the current object ("self" in Python is like "this" in Java)
        - Each state component is supposed to be known with an uncertainty given by the same initial standard deviation sigma0.
        '''
-       self.state = 0
-       self.P = 0
+       self.state = np.zeros((3,1)) 
+       self.P = np.eye(3) * (sigma0 ** 2) # Initial state distribution, We suppose independence first
        
     def update(self, y, x, sigmaY):
        '''
@@ -250,8 +250,20 @@ class Filter:
        - self is a reference to the current object ("self" in Python is like "this" in Java)
        - sigmaY is the standard deviation of the observation noise.
        '''
-       self.state = 0
-       self.P = 0
+       C = x
+       # State noise distribution:
+       R = np.eye(1) * (sigmaY **2)
+       # Output noise distribution
+       # Q = null 
+       # Predicted output covariance matrix
+       S = C * self.P * C.T + R
+       # Kalman Filter Gain
+       K = self.P * C.T * S.I 
+       # Innovation step
+       deltaY = y - C * self.state 
+       # Update Step
+       self.state = self.state + K*deltaY
+       self.P = (np.eye(3) - K * C) * self.P
 
     def integrate(self, Q):
        '''
@@ -259,13 +271,33 @@ class Filter:
        - self is a reference to the current object ("self" in Python is like "this" in Java)
        - Q is a square matrix containing the state noise integrated over one second
        '''
-       self.state = 0
-       self.P = 0
+       A = np.asmatrix(np.eye(3))
+       self.state = A * self.state
+       # Predicted state covariance matrix:
+       self.P = A * self.P * A.T + Q
     
 def testRecursiveLeastSquare(n, sigmae):
     print('Recursive Least Square')
     
     realTheta = np.matrix([1,2,3]).T
+    XTrain = drawInputsInSquare(n)
+    XTrain = addConstantInput(XTrain)
+    yTrain = drawOutput(XTrain, realTheta, sigmae)
+
+    estTheta = np.zeros((3, n))
+    estSigma = np.zeros((3,n))
+    filter = Filter(1.E3)
+
+    for t in range(n):
+        filter.update(yTrain[t], XTrain[t,:], sigmae)
+        estTheta[:,t] = np.reshape(filter.state, 3)
+        estSigma[:,t] = np.sqrt(np.diag(filter.P))
+    
+    plotFilterState(estTheta, estSigma)
+
+    thetaOLS = evalLinearRegressor(XTrain, yTrain)
+    print("Final state : {}".format(filter.state.T))
+    print("OLS estimate: {}".format(thetaOLS.T))
 
 # Question 3.15
 
