@@ -235,25 +235,27 @@ def em(data, nClusters, nIterations):
 	nPeople, nQuestions = data.shape
 	nAnswers = int(np.max(data))
 
-	# Each latent variable is suppose to be following a probability of distribution qi
+	# Each latent variable Hi follows a probability of distribution qi
 	# q[i,j] = P(personne i belongs to Cluster j)
 	# We store those distribution in an array
 	q = np.zeros((nPeople, nClusters))
 
-	# Probabilities of chosing a given latent variable
-	# Initialized by a uniform distribution
-	# ph(i) = P(Cluster = i)
+    # Mixture coefficients ph
+	# Parameters of the distribution of the hidden variables
+	# pc = ph(i) = P(Cluster = i) 
 	ph = np.ones(nClusters)/nClusters
 
-	# Probabilities the choice of visible variable
+	# Probability of the choice of a visible variable
 	# knowing that a given latent variable was chosen
-	# phv(i,j,k) = P(Reponse = A(i,j) | Cluster = k)
-	phv = np.array([np.random.random((nQuestions, nAnswers)) for i in range(nClusters)])
-	phv = normalize(phv)
+	# pvh(i,j,k) = P(Reponse = A(i,j) | Cluster = k)
+	pvh = np.array([np.random.random((nQuestions, nAnswers)) for i in range(nClusters)])
+	# Parameters of different clusters distribution are all equal
+	#pvh = np.array([np.ones((nQuestions, nAnswers)) for i in range(nClusters)])
+	pvh = normalize(pvh)
     
-	# Step E 
-	# We focus only on the distribution q to maximize the MLE
 	for t in range(nIterations):
+	    # Step E 
+	    # First We focus only on the distribution q to maximize the MLE
 		for i in range(nPeople):
 			answers = data[i,:]
 			for c in range(nClusters):
@@ -261,9 +263,9 @@ def em(data, nClusters, nIterations):
 				# First we add the log of our prior 
 				q[i,c] = np.log(ph[c])
                 
-				# Then we add the log-likelihood 
+				# Then we add the log-likelihood of H|V
 				for j in range(nQuestions):
-					q[i,c] += np.log(phv[c,j,int(answers[j]-1)])
+					q[i,c] += np.log(pvh[c,j,int(answers[j]-1)])
 				
 			q[i,:] -= np.max(q[i,:])
 			q[i,:] = np.exp(q[i,:])
@@ -283,13 +285,13 @@ def em(data, nClusters, nIterations):
 						if (data[i,j] == k):
 							s+= q[i,cluster]
 						#total += q[i,cluster]
-					#phv[cluster, j, k-1] = s/total
-					phv[cluster, j, k-1] = s/weights[cluster]
+					#pvh[cluster, j, k-1] = s/total
+					pvh[cluster, j, k-1] = s/weights[cluster]
                 
 				# Normalization 
-				phv[cluster, j, :] /= sum(phv[cluster, j, :])
+				pvh[cluster, j, :] /= sum(pvh[cluster, j, :])
 
-		model = (ph, phv)
+		model = (ph, pvh)
 		return (model, q)
 
 
@@ -302,4 +304,136 @@ def normalize(v):
 		v[i,:,:] = (v[i,:,:].T/np.sum(v[i,:,:],1)).T
 
 	return v
+
+def loglikelihood(model, data, q):
+	"""
+	Computes and return the loglikelihood of a model M 
+	given the data D and hidden variables distributions H (as returned by EM)
+	"""
+	ph, pvh = model
+	nPeople, nQuestions = data.shape
+	logL = 0
+	for i in range(nPeople):
+		answers = data[i,:]
+		for k in range(nQuestions):
+			logL += np.log(sum(pvh[:, k, int(answers[k] - 1)] * q[i,:].T))
+	return logL
+
+def em2(data, nClusters, epsilon):
+	''' Applique l'algorithme EM 
+	- pendant un nombre fixe d'itérations nIterations
+	- pour évaluer les paramètres d'un modèle de nClusters clusters
+	- à partir des données data décrites au format des données produites par generateData
+	
+	Doit renvoyer le couple (model,H) où
+	- model est le modèle appris au même format que les modèles produits pare generateModel
+	- H est une matrice (nombre de personnes, nombre de clusters) dont les lignes
+	correspondent aux distribution de cluster de chaque personne
+	'''
+
+	nPeople, nQuestions = data.shape
+	nAnswers = int(np.max(data))
+
+	# Each latent variable Hi follows a probability of distribution qi
+	# q[i,j] = P(personne i belongs to Cluster j)
+	# We store those distribution in an array
+	q = np.zeros((nPeople, nClusters))
+
+    # Mixture coefficients ph
+	# Parameters of the distribution of the hidden variables
+	# pc = ph(i) = P(Cluster = i) 
+	ph = np.ones(nClusters)/nClusters
+
+	# Probability of the choice of a visible variable
+	# knowing that a given latent variable was chosen
+	# pvh(i,j,k) = P(Reponse = A(i,j) | Cluster = k)
+	pvh = np.array([np.random.random((nQuestions, nAnswers)) for i in range(nClusters)])
+	# Parameters of different clusters distribution are all equal
+	#pvh = np.array([np.ones((nQuestions, nAnswers)) for i in range(nClusters)])
+	pvh = normalize(pvh)
+
+	# Threshold epsilon
+	oldLogL = 0;
+	deltalogL = 100;
+    
+	while deltalogL > epsilon:
+
+		# Step E 
+		# First We focus only on the distribution q to maximize the MLE
+		for i in range(nPeople):
+			answers = data[i,:]
+			for c in range(nClusters):
+				# We use log since the probabilities might have small values 
+				# First we add the log of our prior 
+				q[i,c] = np.log(ph[c])
+				
+				# Then we add the log-likelihood of H|V
+				for j in range(nQuestions):
+					q[i,c] += np.log(pvh[c,j,int(answers[j]-1)])
+				
+			q[i,:] -= np.max(q[i,:])
+			q[i,:] = np.exp(q[i,:])
+			# normalize
+			q[i,:] /= np.sum(q[i,:])
+		
+		# Step M
+		weights = np.sum(q,0)
+		ph = weights/np.sum(weights)
+
+		for cluster in range(nClusters):
+			for j in range(nQuestions):
+				for k in range(1, nAnswers + 1):
+					s = 0
+					#total = 0.
+					for i in range(nPeople):
+						if (data[i,j] == k):
+							s+= q[i,cluster]
+						#total += q[i,cluster]
+					#pvh[cluster, j, k-1] = s/total
+					pvh[cluster, j, k-1] = s/weights[cluster]
+				
+				# Normalization 
+				pvh[cluster, j, :] /= sum(pvh[cluster, j, :])
+		
+		model = (ph, pvh)
+		optLogL = loglikelihood(model, data, q)
+		print(optLogL)
+		deltalogL = abs(oldLogL - optLogL)
+		oldLogL = optLogL
+
+		
+	return (model, q, optLogL)
+
+	def BIC(model, logL, nPeople):
+        """
+		Compute the Bayesian Information Criterion
+		In order to  find the ideal number of clusters that produces accurate but not overspecic models, 
+		we a criterion that penalizes models with a large number of parameters. 
+		The Bayesian Information Criterion (BIC) is one of these criteria. 
+		While BIC has some theorical justi cations for the exponential family of parameter distributions 
+		whose categorical distributions are member of, we use it here as an empirical criterion.
+		"""
+		ph, pvh = model
+		nClusters, nQuestions, nAnswers = pvh.shape
+
+		nParams = (nClusters - 1) + nClusters * nQuestions *(nAnswers - 1)
+		bic = -2. * logL + nParams * np.log(nPeople)
+        return bic
+	
+	def findBestModel(D):
+		nPeople, nQuestions = D.shape
+		bestBic = 1E-1
+		bestNClusters = 1
+		for nClusters in range(1,10):
+			M, H, logL = em2(D, nClusters, 1E-1)
+			bic = BIC(M, logL, nPeople)
+			if(bic < bestBic):
+				bestBic = bic
+				bestModel = M
+				bestNClusters = nClusters
+		
+		return bestModel, bestNClusters
+
+
+
 
