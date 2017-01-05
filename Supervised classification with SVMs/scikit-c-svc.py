@@ -8,7 +8,8 @@ import sklearn.datasets
 import sklearn.utils
 import sklearn.svm
 import sklearn.metrics
-import sklearn.cross_validation
+# import sklearn.model_selection
+import sklearn.model_selection
 
 # Let us load the dataset.
 data_size = 2000
@@ -42,7 +43,7 @@ print('Cross validation')
 print('################')
 print()
 
-scores = sklearn.cross_validation.cross_val_score(classifier, inputs, labels, cv=5)
+scores = sklearn.model_selection.cross_val_score(classifier, inputs, labels, cv=5)
 print('scores = ')
 for s in scores:
     print('         {:.2%}'.format(1-s))
@@ -73,10 +74,47 @@ for idx, (vec,img,label) in enumerate(it.islice(data,16)):
                                     label))
 plt.show()
 
+#############################################
+# Testing on other dataset
+#############################################
+
+# # Load data
+# print(' ')
+# data_size = 2000
+# data_size = min(2*data_size,len(i))
+# inputs    = i[data_size+1:2*data_size]
+# outputs   = o[data_size+1:2*data_size]
+# images    = (data.reshape((28,28))/255.0 for data in inputs)
+# labels    = np.array([int(i) for i in outputs])
+# print('Dataset 2 loaded')
+# # Load classifier 
+# print(' ')
+# infile = open('classifier-c-svc.pkl','rb')
+# predictor = pickle.load(infile)
+# print()
+# print('predictor loaded')
+
+# # Cross-validation
+# print()
+# print('################')
+# print('Cross validation')
+# print('################')
+# print()
+
+# # Test (on the dataset itself...)
+# print('######')
+# print(classifier)
+# print('######')
+# predicted = predictor.predict(inputs)
 
 
-
-
-
-
-
+# fig = plt.figure(figsize=(10,10))
+# data = zip(inputs,images,labels)
+# for idx, (vec,img,label) in enumerate(it.islice(data,16)):
+#     plt.subplot(4,4, idx + 1)
+#     plt.axis('off')
+#     plt.imshow(img, cmap=plt.cm.gray_r, interpolation='nearest')
+#     plt.title('#{} is {}/{}'.format(idx,
+#                                     predictor.predict([vec])[0],
+#                                     label))
+# plt.show()

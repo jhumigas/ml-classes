@@ -8,7 +8,8 @@ import sklearn.datasets
 import sklearn.utils
 import sklearn.svm
 import sklearn.metrics
-import sklearn.cross_validation
+# import sklearn.cross_validation
+import sklearn.model_selection
 
 # Let us load the dataset.
 data_size = 2000
@@ -42,7 +43,7 @@ print('Cross validation')
 print('################')
 print()
 
-scores = sklearn.cross_validation.cross_val_score(classifier, inputs, labels, cv=5)
+scores = sklearn.model_selection.cross_val_score(classifier, inputs, labels, cv=5)
 print('scores = ')
 for s in scores:
     print('         {:.2%}'.format(1-s))
