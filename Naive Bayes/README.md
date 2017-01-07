@@ -29,10 +29,12 @@ Following are the steps followed to apply Naive Bayes on Pima indians patents da
 
 The overall objective is to maximize the likelihood P(y|X).
 To do so, first using Bayes rules we know that P(y|X) = P(X|y) * P(y) / P(X) at each step.
-One then estimates the distribution P(X|y), for each attribute per class.
+Here we suppose that P(X|y) is a normal distribution and P(y) a uniform distribution.
+With these assumption, maximising the likelihood P(y|X) is indeed equivalent to taking P(X|y) ~ N(mean(Xj), var(Xj)), with Xj the set of attribute for feature j.
+One just estimates the distribution P(X|y), for each attribute per class. 
 In the prediction step, we keep the biggest class probability.
 
-One can try different distributions, as we used here Normal distribution, on can use Bernouilli distribution, Poisson distribution, but this would need further assumptions about the data.
+One can try different distributions, as we used here Normal distribution, on can use Bernouilli distribution, Poisson distribution, but this would need further assumptions about the data, and adapting the model
 For a stronger bayesian version, one can consider another distribution rather than Bernouilli prior for the labels Y as well.
 
 ## Sources
