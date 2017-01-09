@@ -2,7 +2,7 @@
 
 // On va stocker les imagettes-prototypes au sein d'une grille.
 #define WIDTH  10
-#define HEIGHT 3
+#define HEIGHT 10
 typedef uci::Map<WIDTH,HEIGHT,
 		 uci::Database::imagette::width,
 		 uci::Database::imagette::height> Prototypes;
@@ -45,13 +45,64 @@ void learnProto(double alpha, Prototypes::imagette& w, const uci::Database::imag
 	  }        
 	}
 
+
 // Calcul de la distance entre une échantillon et un prototype
 double distanceProto(const Prototypes::imagette& w, const uci::Database::imagette& xi)        {
 	  double distance = 0.0;
-	  for(int i = 0 ; i < uci::Database::imagette::height ; ++i)
-        for(int j = 0 ; j < uci::Database::imagette::width ; ++j)
+	  for(int i = 0 ; i < uci::Database::imagette::height ; ++i){
+        for(int j = 0 ; j < uci::Database::imagette::width ; ++j){
           distance += (xi(i,j)-w(i,j))*(xi(i,j)-w(i,j));
+				}
+		}
+
+
+	  return distance;
+	}
+
+
+// Calcul de la distance entre une échantillon et un prototype
+// La distance est calculee entre le pixel du proto et une region de 3*3 autour du pixel de l'echantillon
+double distanceProtoPonderee(const Prototypes::imagette& w, const uci::Database::imagette& xi)        {
+	  double distance = 0.0;
+	  for(int i = 0 ; i < uci::Database::imagette::height ; ++i){
+        for(int j = 0 ; j < uci::Database::imagette::width ; ++j){
+          distance += 4*(xi(i,j)-w(i,j))*(xi(i,j)-w(i,j));
           // La distance n'est pas normé ici; on considere une perte L2
+					if( i>0 && i<uci::Database::imagette::height && j>0 && j<uci::Database::imagette::width){
+						for(int k = -1 ; k<2; ++k)
+						    for(int l = -1; l<2; ++l)
+								    if(!(k==0 && l==0))
+										    distance += (xi(i+k,j+l)-w(i,j))*(xi(i+k,j+l)-w(i,j));
+					}
+
+
+				}
+		}
+	  return distance;
+	}
+// Calcul de la distance entre une échantillon et un prototype
+// La distance est calculee entre le pixel du proto et une region de 3*3 moyenne
+double distanceProtoMoyenne(const Prototypes::imagette& w, const uci::Database::imagette& xi)        {
+	  double distance = 0.0;
+		double pond = 0.0;
+	  for(int i = 0 ; i < uci::Database::imagette::height ; ++i){
+        for(int j = 0 ; j < uci::Database::imagette::width ; ++j){
+          
+          // La distance n'est pas normé ici; on considere une perte L2
+					if( i>0 && i<uci::Database::imagette::height && j>0 && j<uci::Database::imagette::width){
+						pond = 0.0;
+						for(int k = -1 ; k<2; ++k)
+						    for(int l = -1; l<2; ++l)
+										    pond += xi(i+k,j+l);
+
+						distance += (pond-w(i,j))*(pond-w(i,j));
+					}else{
+						distance += (xi(i,j)-w(i,j))*(xi(i,j)-w(i,j));
+					}
+
+
+				}
+		}
 	  return distance;
 	}
 
@@ -59,7 +110,7 @@ double distanceProto(const Prototypes::imagette& w, const uci::Database::imagett
 void winnerProto(const Prototypes& protos, const uci::Database::imagette& xi, int& i, int& j) {
 	for(int k =0; k < HEIGHT; ++k){
 	   for(int l=0; l < WIDTH; ++l)
-	      if (distanceProto(protos(i,j), xi) < distanceProto(protos(k,l), xi)){
+	      if (distanceProtoMoyenne(protos(i,j), xi) < distanceProtoMoyenne(protos(k,l), xi)){
 	          i = k;
 	          j = l;
 		  }
@@ -87,18 +138,18 @@ int main(int argc, char* argv[]) {
 	   }
     }*/
     
-    double alpha = 0.15;
+    double alpha = 0.35;
     int i = 0;
     int j = 0;
     
-    int my_range = 400;
+    int my_range = 100;
 	prototypes = initProtos(database, HEIGHT, WIDTH);
 	// K-means
 	for(int p=0; p < my_range; ++p){
 		//if(alpha > 0.15)
 	    //	alpha = alpha - p*(0.003/my_range);
 		//cout << alpha << endl;
-	for(int m = 0; m < 25; ++m){
+	for(int m = 0; m < 100; ++m){
 		  database.Next();
 		  uci::Database::imagette& xi = database.input;
 		  winnerProto(prototypes, xi, i, j);

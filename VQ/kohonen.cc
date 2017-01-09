@@ -13,9 +13,9 @@ typedef uci::Map<WIDTH,HEIGHT,
 // pixels sont des unsigned char). Le & evite les copies inutiles.
 void initProto(Prototypes::imagette& w,
                const uci::Database::imagette& xi) {
-  for(int i = 0 ; i < uci::Database::imagette::height ; ++i)
-    for(int j = 0 ; j < uci::Database::imagette::width ; ++j)
-      w(i,j) = (double)(xi(i,j));
+  //for(int i = 0 ; i < uci::Database::imagette::height ; ++i)
+    //for(int j = 0 ; j < uci::Database::imagette::width ; ++j)
+      //w(i,j) = (double)(xi(i,j));
 }
 
 // Initialisation d'une grille de prototype de taille height*width
@@ -78,12 +78,31 @@ double distanceProto(const Prototypes::imagette& w, const uci::Database::imagett
 	  return sqrt(distance);
 	}
 
+// Calcul de la distance entre une échantillon et un prototype
+// La distance est calculee entre le pixel du proto et les pixels d'une region de 3*3 dont le pixel central a plus de poids
+double distanceProtoPonderee(const Prototypes::imagette& w, const uci::Database::imagette& xi)        {
+	  double distance = 0.0;
+	  for(int i = 0 ; i < uci::Database::imagette::height ; ++i){
+        for(int j = 0 ; j < uci::Database::imagette::width ; ++j){
+          distance += 4*(xi(i,j)-w(i,j))*(xi(i,j)-w(i,j));
+          // La distance n'est pas normé ici; on considere une perte L2
+					if( i>0 && i<uci::Database::imagette::height-1 && j>0 && j<uci::Database::imagette::width){
+						for(int k = -1 ; k<2; ++k)
+						    for(int l = -1; l<2; ++l)
+								    if(!(k==0 && l ==0))
+										    distance += (xi(i+k,j+l)-w(i,j))*(xi(i+k,j+l)-w(i,j));
+					}
+				}
+		}
+	  return distance;
+	}
+
 // Trouve le prototype le plus proche d'un échantillon donné.	
 void winnerProto(const Prototypes& protos, const uci::Database::imagette& xi, int& i, int& j) {
 	
 	for(int k =0; k < HEIGHT; ++k){
 	   for(int l=0; l < WIDTH; ++l)
-	      if (distanceProto(protos(i,j), xi) < distanceProto(protos(k,l), xi)){
+	      if (distanceProtoPonderee(protos(i,j), xi) < distanceProtoPonderee(protos(k,l), xi)){
 	          i = k;
 	          j = l;
 		  }
@@ -110,19 +129,19 @@ int main(int argc, char* argv[]) {
 	   }
     }*/
     
-    double alpha = 0.15;
+    double alpha = 0.65;
     int r = 3;
     int i_winner = 0;
     int j_winner = 0;
 
     
-    int my_range = 400;
+    int my_range = 100;
 	Prototypes prototypes = initProtos(database, HEIGHT, WIDTH);
 	// K-means
 	for(int p=0; p < my_range; ++p){
 
 	    // alpha += p*(0.8)/my_range;
-	for(int m = 0; m < 250; ++m){
+	for(int m = 0; m < 50; ++m){
 		  database.Next();
 		  uci::Database::imagette& xi = database.input;
 		  winnerProto(prototypes, xi, i_winner, j_winner);
