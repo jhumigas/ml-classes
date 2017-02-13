@@ -4,6 +4,7 @@ import argparse
 import os.path
 from sklearn.mixture import GaussianMixture
 from sklearn.cluster import KMeans
+from scipy.stats import multivariate_normal
 
 def init_centroids(n=3):
     """
@@ -36,9 +37,19 @@ def read_image(path):
 # Consider same covariance matric between Vs
 # Consider diagonal covariance matrice for Vs
 # Consider single variance matrices
-def em(data, nc=3, nIt=10, epsilon=3000):
+def em(data, nc=3, nIt=4, epsilon=100):
     """
     EM algorithm
+    We added the following constraint: The covariance matrix are diagonal
+
+    Args:
+        data: Data on which to fit the model
+        nc: Number of clusters
+        nIt : Number of iterations
+        epsilon : Convergence parameter (not activated here)
+    
+    Returns:
+        clusters means and covariances matrices, parameters distribution
     """
     m, n = data.shape
     # q s.t qi = q[i,:] ~ P(Hi|Vi, theta)
@@ -55,13 +66,15 @@ def em(data, nc=3, nIt=10, epsilon=3000):
     # pvh = P(V|H,theta), modelled by Gaussian distributions
     means_k = KMeans(n_clusters=nc).fit(data).cluster_centers_
     centroids_means = means_k
-    centroids_variances = np.random.randint(45*45, high=85*85,  size=(nc*n, nc*n)).astype(float)
+    centroids_variances = np.random.randint(90*90, high=200*200,  size=(nc*n, nc*n)).astype(float)
+    # Diagonal variance => independence between RGB
+    centroids_variances = np.diag(np.diag(centroids_variances))
 
 
     # Threshold
     delta_ = epsilon*10
-    while(delta_ > epsilon):
-    # for iteration in range(nIt):
+    # while(delta_ > epsilon):
+    for iteration in range(nIt):
         # Expectation step, we keep pvh parameter and distribution ph constant
         # Minimization of the entropy
         # q ~ P(H|V) = K*P(V|H) * P(H)
@@ -74,6 +87,7 @@ def em(data, nc=3, nIt=10, epsilon=3000):
                     centroids_variances[c1*n:(c1+1)*n, c1*n:(c1+1)*n] += np.random.randint(10,54,size=(n,n))
                     det_variance = np.linalg.det(centroids_variances[c1*n:(c1+1)*n, c1*n:(c1+1)*n])
                 inv_variance = np.linalg.inv(centroids_variances[c1*n:(c1+1)*n, c1*n:(c1+1)*n])
+                # We pass by log, since we expect huge or small value
                 exp_arg = delta_x.T.dot(inv_variance).dot(delta_x)
                 qLog[c1, s] = exp_arg - 0.5* np.log(det_variance) + np.log(ph[c1,0])
 
@@ -114,7 +128,7 @@ def em(data, nc=3, nIt=10, epsilon=3000):
                 delta_x_k = data[k,:] - centroids_means[c,:]
                 # delta_x_k = delta_x_k.reshape(3,1)
                 temp += q[c,k]*delta_x_k.dot(delta_x_k.T)
-            # temp[temp>255*255*m*ph[c,0]] = np.random.randint(200*200,255*255, size=(temp[temp>255*255*m*ph[c,0]].shape))
+            temp = np.diag(np.diag(temp.reshape(3,3)))
             temp[temp>255*255*m*ph[c,0]] = variance_old[temp>255*255*m*ph[c,0]] + np.random.randint(10,50, size=(temp[temp>255*255*m*ph[c,0]].shape))
             centroids_variances[c*n:(c+1)*n,c*n:(c+1)*n] = temp/(m*ph[c,0])
 
@@ -126,15 +140,60 @@ def em(data, nc=3, nIt=10, epsilon=3000):
             print("Delta value: {}".format(delta_))
     return(ph, centroids_means, centroids_variances)
 
-def codesamples(estimator, samples2D, fshape):
+def codesamples(centroids_means, centroids_variances, samples2D, fshape):
     """
+    Recode samples based on the model fitted on them
+    Adapted to ouptut of function em. 
+
+    Args:
+        centroids_means: 3D vectors
+        centroids_variances: 3*3 matrices
+        samples2D: N*3 array of samples2D
+        fshape : Original shapes of the samples array 
+    
+    Returns:
+        coded: Image resulting from the clustering
+        result: Samples clustered (in a N*3 shape)
     """
+    distributions = []
+    nClusters, m = centroids_means.shape
+    for c in range(0, nClusters):
+        distributions.append(multivariate_normal(centroids_means[c,:], centroids_variances[c*m:(c+1)*m,c*m:(c+1)*m]))
+    
+    result = np.zeros(samples2D.shape)
+    for k in range(samples2D.shape[0]):
+        c_label = 0
+        for c in range(0, len(distributions)):
+            if distributions[c_label].pdf(samples2D[k,:]) < distributions[c].pdf(samples2D[k,:]):
+                result[k,:] = centroids_means[c,:]
+                c_label = c
+    
+    coded = np.reshape(result, fshape)
+    return coded
+
+def codesamples2(nClusters, samples2D, fshape):
+    """
+    Recode samples based on the model fitted on them
+    Uses sklearn GMM.
+
+    Args:
+        centroids_means: 3D vectors
+        centroids_variances: 3*3 matrices
+        samples2D: N*3 array of samples2D
+        fshape : Original shapes of the samples array 
+    
+    Returns:
+        coded: Image resulting from the clustering
+        result: Samples clustered (in a N*3 shape)
+    """
+    estimator = GaussianMixture(nClusters, covariance_type='diag')
+    estimator.fit(samples2D)
     result = np.zeros(samples2D.shape)
     for k in range(samples2D.shape[0]):
         cluster = estimator.predict(samples2D[k,:].reshape(1,3))
         result[k,:] = estimator.means_[cluster,:]
     coded = np.reshape(result, fshape)
-    return coded, result
+    return coded
 
 
 
@@ -153,12 +212,11 @@ im2, shape = read_image(args['path'])
 centroids = init_centroids(int(args["nClusters"]))
 (mix_coef, model_mean, model_var) = em(im2[:,:], nc=int(args['nClusters']))
 print("Mixture coefficients =\n {}\n  Model variances = \n{}\n  Model means=\n{}\n".format(mix_coef, model_var, model_mean))
-# estimator = GaussianMixture(int(args["nClusters"]), covariance_type='tied')
-# estimator.fit(im2)
+coded= codesamples(model_mean, model_var, im2, shape)
+# coded, result = codesamples2(int(args["nClusters"]), im2, shape)
 # print("Mixture coefficients =\n {}\n  Model means = \n{}\n  Model variances=\n{}\n".format(estimator.weights_, estimator.means_ ,estimator.covariances_))
-# coded, result = codesamples(estimator, im2, shape)
-# print("Total distorsion: {}".format(compute_distorsion(im2, result)))
-# extension = os.path.splitext(args["path"])[1]
-# cv2.imwrite(args["path"].replace(extension, "_gmm_tied_out_"+extension), coded)
+# print("Total distorsion: {}".format(compute_distorsion(im2, np.reshape(coded, (coded.shape[0]*coded.shape[1], coded.shape[2])))))
+extension = os.path.splitext(args["path"])[1]
+cv2.imwrite(args["path"].replace(extension, "_gmm_tied_out_"+extension), coded)
 
 

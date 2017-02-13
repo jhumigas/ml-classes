@@ -107,13 +107,14 @@ def codesamples(centroids, labels, fshape):
     for k in range(labels.shape[0]):
         result[k,:] = centroids[labels[k], :]
     coded = np.reshape(result, fshape)
-    return coded, result
+    return coded
 
 def codesamples2(nClusters,samples2D, fshape):
     """
     Output result of replacing each sample by its labelled centroid 
+    Uses sklearns kmeans
     Returns: 
-        3D and 2D array of an image being compressed thanks to kmeans
+        3D array of an image being compressed thanks to kmeans
     """
     estimator = KMeans(n_clusters=nClusters).fit(im2)
     result = np.zeros(samples2D.shape)
@@ -121,7 +122,7 @@ def codesamples2(nClusters,samples2D, fshape):
         cluster = estimator.predict(samples2D[k,:].reshape(1,3))
         result[k,:] = estimator.cluster_centers_[cluster,:]
     coded = np.reshape(result, fshape)
-    return coded, result
+    return coded
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-p", "--path", required=True,
@@ -135,8 +136,8 @@ args = vars(ap.parse_args())
 im2, shape = read_image(args['path'])
 centroids = init_centroids(int(args["nClusters"]))
 # labels, _ = kmeans(im2, centroids)
-# coded, result = codesamples(centroids, labels, shape)
-coded, result = codesamples2(nClusters, im2, shape)
-print("Total distorsion: {}".format(compute_distorsion(im2, result)))
+# coded= codesamples(centroids, labels, shape)
+coded = codesamples2(int(args["nClusters"]), im2, shape)
+print("Total distorsion: {}".format(compute_distorsion(im2, np.reshape(coded, (coded.shape[0]*coded.shape[1], coded.shape[2])))))
 extension = os.path.splitext(args["path"])[1]
 cv2.imwrite(args["path"].replace(extension, "_kmeans"+extension), coded)
