@@ -78,6 +78,10 @@ instance of GMM.
 
 ## Results
 
-TODO
-
+Here are a few illustrations on a small portion of an image found around the internet, with 3 clusters.
+![Eye Original](https://gitlab.rezometz.org/david.mugisha/ml-classes/blob/a0c4c56d3266db0aeae7b2f647de4003e3ea5492/Bayesian%20Learning%20with%20EM/eye.png)
+![Eye Full](https://gitlab.rezometz.org/david.mugisha/ml-classes/blob/a0c4c56d3266db0aeae7b2f647de4003e3ea5492/Bayesian%20Learning%20with%20EM/images/eye_gmm_full_out_.png)
+![Eye Diag](https://gitlab.rezometz.org/david.mugisha/ml-classes/blob/a0c4c56d3266db0aeae7b2f647de4003e3ea5492/Bayesian%20Learning%20with%20EM/images/eye_gmm_diag_out_.png)
+![Eye Tied](https://gitlab.rezometz.org/david.mugisha/ml-classes/blob/a0c4c56d3266db0aeae7b2f647de4003e3ea5492/Bayesian%20Learning%20with%20EM/images/eye_gmm_tied_out_.png)
+![Eye Tied](https://gitlab.rezometz.org/david.mugisha/ml-classes/blob/a0c4c56d3266db0aeae7b2f647de4003e3ea5492/Bayesian%20Learning%20with%20EM/images/eye_kmeans.png)
 
