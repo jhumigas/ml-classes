@@ -155,3 +155,9 @@ CTestTestfile.cmake
 #######
 
 proto*
+kmean*
+avconv*
+kohone*
+basic-example
+k-means*
+*.pkl
