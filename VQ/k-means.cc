@@ -80,6 +80,7 @@ double distanceProtoPonderee(const Prototypes::imagette& w, const uci::Database:
 		}
 	  return distance;
 	}
+	
 // Calcul de la distance entre une échantillon et un prototype
 // La distance est calculee entre le pixel du proto et une region de 3*3 moyenne
 double distanceProtoMoyenne(const Prototypes::imagette& w, const uci::Database::imagette& xi)        {

@@ -8,7 +8,6 @@ import sklearn.datasets
 import sklearn.utils
 import sklearn.svm
 import sklearn.metrics
-import sklearn.cross_validation
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import GridSearchCV
 
@@ -21,7 +20,7 @@ params_grid = [
 # create and fit a ridge regression model, testing each alpha
 svr = sklearn.svm.SVC()
 model = Ridge()
-grid = GridSearchCV(svr, parameters)
+grid = GridSearchCV(svr, params_grid)
 
 # Let us load the dataset.
 data_size = 2000
@@ -54,7 +53,7 @@ print('Cross validation')
 print('################')
 print()
 
-scores = sklearn.cross_validation.cross_val_score(grid, inputs, labels, cv=5)
+scores = sklearn.model_selection.cross_val_score(grid, inputs, labels, cv=5)
 print('scores = ')
 for s in scores:
     print('         {:.2%}'.format(1-s))

@@ -17,7 +17,7 @@ https://archive.ics.uci.edu/ml/datasets/Pima+Indians+Diabetes
 
 > Each record has a class value that indicates whether the patient suffered an onset of diabetes within 5 years of when the measurements were taken (1) or not (0).
 
-## Pipe 
+## Pipeline
 
 Following are the steps followed to apply Naive Bayes on Pima indians patents data : 
 
@@ -27,15 +27,16 @@ Following are the steps followed to apply Naive Bayes on Pima indians patents da
 * Compute predictions on test set 
 * Evaluate accuracy (or risk) on test set
 
-The overall objective is to maximize the likelihood P(y|X).
+The overall objective is to maximize the likelihood P(y|X) this using the Maximum Likelihood Estimator (MLE) principle.
 To do so, first using Bayes rules we know that P(y|X) = P(X|y) * P(y) / P(X) at each step.
-Here we suppose that P(X|y) is a normal distribution and P(y) a uniform distribution.
-With these assumption, maximising the likelihood P(y|X) is indeed equivalent to taking P(X|y) ~ N(mean(Xj), var(Xj)), with Xj the set of attribute for feature j.
+We assume X to be continious variable and y to be a discrete one. Here we suppose that P(X|y) is a normal distribution and P(y) a uniform distribution.
+With these assumptions, maximising the likelihood P(y|X) is indeed equivalent to taking P(X|y) ~ N(mean(Xj), var(Xj)), with Xj the set of attribute for feature j.
 One just estimates the distribution P(X|y), for each attribute per class. 
 In the prediction step, we keep the biggest class probability.
 
-One can try different distributions, as we used here Normal distribution, on can use Bernouilli distribution, Poisson distribution, but this would need further assumptions about the data, and adapting the model
-For a stronger bayesian version, one can consider another distribution rather than Bernouilli prior for the labels Y as well.
+One can try different distributions, as we used here Normal distribution, on can use Bernouilli distribution, Poisson distribution, but this would need further assumptions about the data, and adapting the model.
+For a stronger bayesian version, one can consider the parameter modeled by a non uniform distribution, which would required the MAP estimator.
+As a reminder, the MLE is directly derived from the Maximum A Priori Estimator, where we suppose the priori distribution to be uniform.
 
 ## Sources
 
