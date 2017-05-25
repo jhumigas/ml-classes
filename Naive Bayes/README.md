@@ -1,12 +1,12 @@
 # Naive Bayes 
 
 Here we implement Naive Bayes from scratch. 
-Naive Bayes is often in classification problems. It is a method used to model a classification problem probabalistically.
+Naive Bayes is often in classification problems. It is a method used to model a classification problem probalistically.
 In every supervised learning problem, we are provided with inputs X and outputs y. In fact, we consider that there is an underlying processing label each input xi by an output yi.
 Such a process is called oracle, and is unknown. Machine Learning has at its core the objective of connecting a model of the oracle to a set of data (X,y) provided. We usually consider a hypothesis space where lives hypothesis functions s.t f(x) = y.
 
 Contrary to frequentist approach where the so called hypothesis function are parametrized, in bayesian learning we keep updating a distribution P(theta|x,y) conditionnaly to the set of available samples (xi,yi).
-As the samples are received, some hypothesis get more likely than others. Naive Bayes consider samples to be independently distributed. This rather storng assumption explains the name 'naive' but result in simple factorization of the generic distribution.
+As the samples are received, some hypothesis get more likely than others. Naive Bayes consider samples to be independently distributed. This rather strong assumption explains the name 'naive' but result in simple factorization of the generic distribution.
 tl; dr: “Naive Bayes” assumes the feature variables are independent of each other given the target class Y : Xi ind Xj | Y.
 
 ## Dataset 
