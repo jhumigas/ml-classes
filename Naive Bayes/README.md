@@ -28,13 +28,16 @@ Following are the steps followed to apply Naive Bayes on Pima indians patents da
 * Evaluate accuracy (or risk) on test set
 
 The overall objective is to maximize the likelihood P(y|X) this using the Maximum Likelihood Estimator (MLE) principle.
-To do so, first using Bayes rules we know that P(y|X) = P(X|y) * P(y) / P(X) at each step.
+To do so, first using Bayes rules we know that P(y|X) = P(X|y) * P(y) / P(X).
 We assume X to be continious variable and y to be a discrete one. Here we suppose that P(X|y) is a normal distribution and P(y) a uniform distribution.
-With these assumptions, maximising the likelihood P(y|X) is indeed equivalent to taking P(X|y) ~ N(mean(Xj), var(Xj)), with Xj the set of attribute for feature j.
-One just estimates the distribution P(X|y), for each attribute per class. 
-In the prediction step, we keep the biggest class probability.
+With these assumptions, maximising the likelihood P(y|X) is indeed equivalent to taking for all j in [1,...,c], taking P(Xj|y) ~ N(mean(Xj), var(Xj)), with Xj the set of attribute for feature j.
 
-One can try different distributions, as we used here Normal distribution, on can use Bernouilli distribution, Poisson distribution, but this would need further assumptions about the data, and adapting the model.
+One just estimates the distribution P(X|y), for each attribute per class.
+All in all:
+    * in the learning step we compute P(X|y) then the parameter of distribution X =(X1,...,XC)
+    * in the prediction step, we keep the biggest class probability given P(y|X)
+
+One can try different distributions, as we used here Normal distribution, on can use Binomial distribution, Poisson distribution, but this would need further assumptions about the data, and adapting the model.
 For a stronger bayesian version, one can consider the parameter modeled by a non uniform distribution, which would required the MAP estimator.
 As a reminder, the MLE is directly derived from the Maximum A Priori Estimator, where we suppose the priori distribution to be uniform.
 
@@ -43,4 +46,4 @@ As a reminder, the MLE is directly derived from the Maximum A Priori Estimator, 
 I mostly looked on the following link to see the actual work pipe. 
 http://machinelearningmastery.com/naive-bayes-classifier-scratch-python/
 
-For the theory, I was applying my ML courses.
+For the theory, I was applying my [ML courses](http://sirien.metz.supelec.fr/spip.php?article91).

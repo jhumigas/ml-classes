@@ -29,7 +29,8 @@ variance_false = np.var(S_train_false[:,:8], axis = 0, ddof= 1)
 conditional_probability_true = len(S_train_true)/len(S_train)
 conditional_probability_false = len(S_train_false)/len(S_train)
 
-# Make a predictions
+# Evaluation 
+# Computing prediction on test set
 probabilities = np.ones((S_test.shape[0], 2))
 predictions = np.ones((S_test.shape[0], 1))
 for i in range(0, S_test.shape[0]):
