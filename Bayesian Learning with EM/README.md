@@ -1,6 +1,7 @@
 # Mixture of categorical disttributions and the EM algorithm 
 
-We consider here a simple case to apply the EM algorithm. 
+*This part of my ML course. The subject can be found [here](http://sirien.metz.supelec.fr/spip.php?article94)*
+We consider a simple case to apply the EM algorithm. 
 
 * A survey application : Individuals answer a set of questions and we want to group them
 
@@ -66,7 +67,6 @@ EM involves two main steps :
 * Maximization Step : In this step we maximize L* regarding Θ (q is supposed constant)
 
 
-## Results
+## References
 
-TODO
-
+Jeremy Fix, H.F Buet, M. Geist and F. Pennerath, [Machine Learning](http://sirien.metz.supelec.fr/spip.php?article91)

@@ -1,3 +1,6 @@
+"""Perfom Clustering on an image using Kmeans clustering
+"""
+
 import numpy as np
 import cv2
 import argparse

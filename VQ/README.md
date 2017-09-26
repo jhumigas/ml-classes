@@ -1,6 +1,6 @@
 # Vector Quantization
 
-This small lab is about vector quantization technics, a class of unsupervised learning algorithms commonly used for clustering.
+This small lab is about vector quantization techniques, a class of unsupervised learning algorithms commonly used for clustering.
 Among their advantages, one can notice is that they keep the topology of the initial dataset. 
 In Vector Quantization, we consider a set of prototypes, each one averaging in some sort of way 
 information of a certain set of samples. To compare a given prototype to the sample it is representing, we define a loss function, that introduces on a global scale a distorsion i.e the expectation, when a sample x are taken according to X, of the error made by assimilating x to its closest prototype in Ω [1]. The core idea of the vector quantization is to minimize that distorsion which involves chosing the right number of prototypes and placing them right.
@@ -17,6 +17,6 @@ The inconvenience of using only the euclidian distance, is that it does not real
 A better measure should, say, implement the correlation between two digits.
 
 
-## Reference
+## References
 
-Jeremy Fix, H.F Buet, M. Geist and F. Pennerath, *Machine Learning*
+Jeremy Fix, H.F Buet, M. Geist and F. Pennerath, [Machine Learning](http://sirien.metz.supelec.fr/spip.php?article91)

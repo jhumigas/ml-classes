@@ -19,10 +19,10 @@ def basicModel():
 	Returns
 	-------
 	(mixtureCoefs, probs) où
-	- mixtureCoefs est un tableau 1D contenant les coefficients de mélange
-	- probs est un tableau 3D de taille (nClusters, nQuestions, nAnswers)
-		contenant les distributions de Dirichlet des réponses
-		pour chaque couple (cluster, question)
+	- mixtureCoefs is a 1D vector holding the mixture coefficients
+	- probs is a 3D array (nClusters, nQuestions, nAnswers)
+		holding Dirichlet distribution associated to answers
+		for each point (cluster, question)
 	'''
 	
 	# Mixture Cluster Coefficients
@@ -95,7 +95,7 @@ def drawModel(model):
 	''' Plot distribution for each clusters
 
 	Args:
-		tuple: Model output by 'generateModel'
+		model(tuple): Model output by 'generateModel'
 	'''
 	
 	plt.ion()
@@ -122,17 +122,19 @@ def drawModel(model):
 
 def drawCluster(H):
 	''' Plot distribution of latent variables
+	H can be either a n*1 or n*nc matrix.
+
+	The number n of rows of H is the number of persons
+	* If H is a n*nc matrix, 
+		the number of columns is the number of clusters
+		and the components H[i,j] gives the likelihood 
+		P(Person i belongs to cluster j)
+	* If H is n*1 matrix, 
+		the component H[i] gives the most probable cluster to 
+		which person i belongs
 	
-	Parameters
-	----------	
-	H:	matrice ou vecteur.
-	Le nombre de lignes de H correspond au nombre de personnes
-	* Si H est une matrice, 
-		le nombre de colonnes est égal au nombre de clusters
-		et le coefficient H[i,j] donne la probabilité que 
-		la personne i appartient au cluster j
-	* Si H est un vecteur, 
-		le coefficient H[i] donne le numéro du cluster de i
+	Args:
+	    H(np.ndarray): (soft or hard) Clusters assignements
 	'''
 	
 	plt.ion()
@@ -200,10 +202,17 @@ def compareClusters(C1,C2):
 	return (bestOverlap, bestPerm)
 	
 def permuteClusters(M, H, perm):
-	''' Permute clusters on a model M
+	'''Permute clusters on a model M
 	and latent cluster distributions H using
 	cluster mapping perm
-	Returns (permuted model, permuted H)
+
+	Args:
+		M: Model
+		H: Latent clusters
+		perm: Cluster mapping 
+	
+	Returns:
+		tuple: (permuted model, permuted H)
 	'''
 	invperm = np.argsort(perm-1)
 	mixtureCoefs, probs = M
@@ -217,12 +226,20 @@ def permuteClusters(M, H, perm):
 ###############
 
 def em(data, nClusters, nIterations):
-	''' Applique l'algorithme EM 
-	- pendant un nombre fixe d'itérations nIterations
-	- pour évaluer les paramètres d'un modèle de nClusters clusters
-	- à partir des données data décrites au format des données produites par generateData
+	''' EM Algorithm
+	the data used here comes from 'generateData'
+
+	Args:
+		data(int): nPeople*nQuestion matrix with at each row the answer to each question for one person
+		nClusters(int): Number of Clusters
+		nIterations(int): Number of iteration to run the EM updates
 	
-	Doit renvoyer le couple (model,H) où
+	Returns:
+		tuple: (model,H) with:
+		   (
+			   model: Learnt model i.e the mixture coefficient and the visible variable (probability)
+			   H: Cluster assignements i.e the probability for each person to belong to a cluster
+		   )
 	- model est le modèle appris au même format que les modèles produits pare generateModel
 	- H est une matrice (nombre de personnes, nombre de clusters) dont les lignes
 	correspondent aux distribution de cluster de chaque personne
@@ -296,8 +313,13 @@ def em(data, nClusters, nIterations):
 
 
 def normalize(v):
-	"""
-	Fait pour une matrice 3-D
+	"""Normalize a 3D array
+
+	Args:
+		v(np.ndarray): 3D array
+	
+	Returns:
+        np.ndarray: Normalized matrix
 	"""
 	dim = v.shape 
 	for i in range(0, dim[0]-1):
@@ -306,9 +328,16 @@ def normalize(v):
 	return v
 
 def loglikelihood(model, data, q):
-	"""
-	Computes and return the loglikelihood of a model M 
+	"""Computes and return the loglikelihood of a model M 
 	given the data D and hidden variables distributions H (as returned by EM)
+
+	Args:
+		model: Mixture coefficient and visible variable distributions
+		data: Matrix holding answers to each questions
+		q: Latent cluster assignements
+	
+	Returns:
+		float: Loglikelihood 
 	"""
 	ph, pvh = model
 	nPeople, nQuestions = data.shape
@@ -320,12 +349,20 @@ def loglikelihood(model, data, q):
 	return logL
 
 def em2(data, nClusters, epsilon):
-	''' Applique l'algorithme EM 
-	- pendant un nombre fixe d'itérations nIterations
-	- pour évaluer les paramètres d'un modèle de nClusters clusters
-	- à partir des données data décrites au format des données produites par generateData
+	''' EM Algorithm with a stopping criterion. 
+	The data used here comes from 'generateData'
+
+	Args:
+		data(int): nPeople*nQuestion matrix with at each row the answer to each question for one person
+		nClusters(int): Number of Clusters
+		epsilon(float): Threshold to detecte if the logLikelihood is still increasing
 	
-	Doit renvoyer le couple (model,H) où
+	Returns:
+		tuple: (model,H) with:
+		   (
+			   model: Learnt model i.e the mixture coefficient and the visible variable (probability)
+			   H: Cluster assignements i.e the probability for each person to belong to a cluster
+		   )
 	- model est le modèle appris au même format que les modèles produits pare generateModel
 	- H est une matrice (nombre de personnes, nombre de clusters) dont les lignes
 	correspondent aux distribution de cluster de chaque personne

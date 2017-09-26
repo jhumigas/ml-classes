@@ -53,3 +53,6 @@ Here are a few illustrations on a small portion of an image found around the int
 ![Eye Tied](images/eye_gmm_tied_out_.png)
 ![Eye Tied](images/eye_kmeans.png)
 
+## References
+
+Jeremy Fix, H.F Buet, M. Geist and F. Pennerath, [Machine Learning](http://sirien.metz.supelec.fr/spip.php?article91)

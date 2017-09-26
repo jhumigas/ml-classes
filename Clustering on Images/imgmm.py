@@ -1,3 +1,7 @@
+"""Perform Clustering on Image using (Gaussian) Mixture Model
+
+Here the EM optmization is used and is coded from scratch
+"""
 import numpy as np
 import cv2
 import argparse

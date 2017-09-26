@@ -47,3 +47,7 @@ I mostly looked on the following link to see the actual work pipe.
 http://machinelearningmastery.com/naive-bayes-classifier-scratch-python/
 
 For the theory, I was applying my [ML courses](http://sirien.metz.supelec.fr/spip.php?article91).
+
+## References
+
+Jeremy Fix, H.F Buet, M. Geist and F. Pennerath, [Machine Learning](http://sirien.metz.supelec.fr/spip.php?article91)
