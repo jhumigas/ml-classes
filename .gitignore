@@ -161,3 +161,7 @@ kohone*
 basic-example
 k-means*
 *.pkl
+
+# File in reinforcement learning
+traj_iter_*.png
+val_pol_iter_*.png
