@@ -36,18 +36,17 @@ Note that LSPI(policy iteration) will require less iterations to converge (5 in 
 ![fittedQ_traj](batch/figs/fittedQ/traj_iter_150.gif)
 
 > The natural trajectory is s.t that an intelligent agent that is starting from the the bottom of the hill will start with small acceleration 
-> The natural trajectory is s.t that an intelligent agent that is starting from the the bottom of the hill will start with small acceleration 
 > then will make use of the inertia to gain momentum. At the begining, the agent is basically trying different trajectories they do not end up at the top of the mountain.  However at the end (with the spiral-like plot), as the we move away from the valley, the velocity is 
 > gradually increasing until the vehicle has enough momentum to climb the whole mountain road.
 
 
 ![fittedQ_val_policy](batch/figs/fittedQ/val_pol_iter_150.gif)
 
-> At the left is plotted the value function. Red is for high value whereas blue one is for lower one.
-> Notice that a the beginning almost the state space have a similar value. But as the iterations go one
+> On the left side is plotted the value function. Red is for high value whereas blue one is for lower one.
+> Notice that a the beginning almost the value function assignes the same value to the whole state space. But as the iterations go one
 > The value function learns which states will cost more to reach. Namely, as the higher the position and velocity are, 
-> the more value is associated. We can even somehow foresee what is the optimized trajectory (position and velocity) to follow.
-> At right is plotted the policy. Red corresponds to going right, blue to left and green to none. Basically, our learnt policy
+> the more value is associated. We can even somehow foresee what is the optimized trajectory (position and velocity) to follow: we just can start from any position and get to a nearby state that allows more value (i.e where the value function is high)
+> On the right side is plotted the policy. Red corresponds to going right, blue to left and green to none. Basically, our learnt policy
 > tells us to push left when the velocity is negativity and right on the contrary, this helps to acquire more momentum.
 > We can notice however that when we are too far on the left, we'll likely throttle right, to avoid hitting the wall.
 
@@ -60,5 +59,5 @@ TODO
 
 ## References
 
-Jeremy Fix, H.F Buet, M. Geist and F. Pennerath, [Machine Learning](http://sirien.metz.supelec.fr/spip.php?article91)
-Szepesvári, C. (2010). Algorithms for reinforcement learning. Synthesis lectures on artificial intelligence and machine learning, 4(1), 1-103.
+* Jeremy Fix, H.F Buet, M. Geist and F. Pennerath, [Machine Learning](http://sirien.metz.supelec.fr/spip.php?article91)
+* Szepesvári, C. (2010). Algorithms for reinforcement learning. Synthesis lectures on artificial intelligence and machine learning, 4(1), 1-103.

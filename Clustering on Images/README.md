@@ -2,7 +2,7 @@
 
 We consider a simple showcase of clustering on images:
 
-* Kmeans clustering, a vector quantization technic
+* Kmeans clustering, a vector quantization technique
 * Gaussian Mixture Model i.e the EM algorithm applied ot model with latent variables
 
 
